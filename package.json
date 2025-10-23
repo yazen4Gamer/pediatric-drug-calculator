@@ -36,9 +36,7 @@
       "output": "dist"
     },
     "files": [
-      "**/*",
-      "!**/node_modules/**/*",
-      "!dist/**/*"
+      "**/*"
     ],
     "asarUnpack": [
       "node_modules/auto-launch/**"
