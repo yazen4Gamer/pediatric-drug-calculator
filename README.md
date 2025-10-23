@@ -1,21 +1,21 @@
 # 🩺 Pediatric Drug Calculator
 
-A **fast, always-on, offline** medication dosage calculator designed for **pediatric emergency** and **PRRT (Pediatric Resuscitation Reference Table)** use.  
-Built with [Electron](https://www.electronjs.org/) and [Bootstrap](https://getbootstrap.com/) to deliver a clean, full-screen interface optimized for emergency rooms, ICUs, and rapid bedside use.
+A **fast, always-on, offline** medication dosage calculator built for **pediatric emergency** and **PRRT (Pediatric Resuscitation Reference Table)** use.  
+Developed with [Electron](https://www.electronjs.org/) and [Bootstrap](https://getbootstrap.com/) to provide a **clean**, **full-screen** interface optimized for **emergency rooms**, **ICUs**, and **bedside use**.
 
 ---
 
-## 🚀 Features
+## 🚀 Key Features
 
-- **Always-on / Auto-start:** launches automatically with system startup.  
-- **Fullscreen Kiosk Mode:** no close buttons; can only be exited through secure settings.  
-- **Emergency & PRRT Modes:** switch between two calculation modes:
-  - 🚨 **Emergency:** quick mL dose calculation using weight-based equations.  
-  - 💉 **PRRT:** advanced mg/kg and concentration-based dosing.
-- **Shared Weight Input:** single weight entry for both calculation modes.  
-- **PDF Export:** print-ready dosing tables for medical documentation.  
-- **Bootstrap UI:** responsive, clean, and easy to navigate.  
-- **Offline:** no internet required.
+- 🖥️ **Always-on / Auto-start:** Launches automatically when the system boots.  
+- 🧭 **Fullscreen Kiosk Mode:** No standard close/minimize buttons; exit through secure settings only.  
+- 🩹 **Dual Modes:**
+  - 🚨 **Emergency Mode:** Rapid mL dose calculation using weight-based equations.  
+  - 💉 **PRRT Mode:** Advanced mg/kg and concentration-based dosing with validation.
+- ⚖️ **Shared Weight Input:** One input drives both calculation modes.  
+- 🧾 **PDF Export:** Clean, print-ready tables for medical documentation.  
+- 🪄 **Bootstrap UI:** Responsive and intuitive interface.  
+- 📴 **Offline First:** Works without an internet connection.
 
 ---
 
@@ -31,29 +31,29 @@ Built with [Electron](https://www.electronjs.org/) and [Bootstrap](https://getbo
 
 ## 🧮 Calculation Modes
 
-- **Emergency Mode:**  
-  Uses predefined equations like `0.1 × weight` to compute volumes quickly.
+### 🚨 Emergency Mode
+Uses predefined equations like `0.1 × weight` to calculate medication volumes quickly.
 
-- **PRRT Mode:**  
-  Calculates **mg dose** based on weight and concentration, with safety checks for max dose/volume.
+### 💉 PRRT Mode
+Calculates **mg dose** based on weight and concentration, including **min/max dose validation**.
 
 ---
 
 ## 🛡️ Safety Features
 
-- Dose and volume validation against min/max limits.  
-- Warnings if exceeding maximum recommended values.  
-- No direct app close (exit through secure settings only).  
-- Kiosk mode to prevent accidental closure.
+- Dose and volume validation against min/max reference values.  
+- Automatic warnings when exceeding safe limits.  
+- Kiosk mode to prevent accidental closure during use.  
+- Secure exit flow (no accidental closing).
 
 ---
 
 ## 🧰 Tech Stack
 
-- ⚡ [Electron](https://www.electronjs.org/)
-- 💻 [Bootstrap](https://getbootstrap.com/)
-- 🧮 Math parser (safe equation evaluation)
-- 📝 HTML2Canvas & jsPDF for PDF generation
+- ⚡ [Electron](https://www.electronjs.org/)  
+- 💻 [Bootstrap](https://getbootstrap.com/)  
+- 🧮 Safe math parser for dose equations  
+- 📝 [html2canvas](https://html2canvas.hertzen.com/) & [jsPDF](https://github.com/parallax/jsPDF) for PDF generation
 
 ---
 
