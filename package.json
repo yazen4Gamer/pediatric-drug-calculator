@@ -1,0 +1,56 @@
+{
+  "name": "pediatric-drug-calculator",
+  "version": "1.0.0",
+  "description": "Pediatric Medication Dose Calculator - Always Available Emergency Reference",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
+    "dist": "electron-builder --publish=never",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": [
+    "medical",
+    "pediatric",
+    "calculator",
+    "emergency",
+    "always-on"
+  ],
+  "author": "Yazen_lol",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^22.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "auto-launch": "^5.0.6",
+    "bootstrap": "^5.3.8",
+    "electron-updater": "^5.0.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.3"
+  },
+  "build": {
+    "appId": "com.medical.pediatriccalculator",
+    "productName": "Pediatric Drug Calculator",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!**/node_modules/**/*",
+      "!dist/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Pediatric Drug Calculator",
+      "runAfterFinish": true
+    }
+  }
+}
