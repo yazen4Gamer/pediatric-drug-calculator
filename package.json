@@ -2,7 +2,7 @@
   "name": "pediatric-drug-calculator",
   "version": "1.0.0",
   "description": "Pediatric Medication Dose Calculator - Always Available Emergency Reference",
-  "main": "main.js",
+  "main": "./src/main/main.js",
   "scripts": {
     "start": "electron .",
     "dev": "NODE_ENV=development electron .",
@@ -20,14 +20,14 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^22.0.0",
-    "electron-builder": "^24.0.0"
+    "electron-builder": "^24.13.3"
   },
   "dependencies": {
     "auto-launch": "^5.0.6",
     "bootstrap": "^5.3.8",
     "electron-updater": "^5.0.0",
     "html2canvas": "^1.4.1",
-    "jspdf": "^3.0.3"
+    "mathjs": "^15.0.0"
   },
   "build": {
     "appId": "com.medical.pediatriccalculator",

@@ -12,7 +12,7 @@ class AppWindow {
         this.mainWindow = null;
         this.isQuitting = false;
         this.appLauncher = null;
-        
+
         // Initialize auto-launch safely
         this.initializeAutoLaunch();
     }
@@ -36,28 +36,41 @@ class AppWindow {
     createWindow() {
         // Create the browser window - REMOVED FULLSCREEN for better usability
         this.mainWindow = new BrowserWindow({
-            width: 1400,
-            height: 900,
-            minWidth: 1000,
-            minHeight: 700,
-            fullscreen: false, // Changed from true to false for better usability
-            frame: false, // Remove default window frame
-            resizable: true,
+            fullscreen: true,              // 👈 Always fullscreen
+            frame: false,                  // No OS frame
+            resizable: false,             // ❌ User can't resize
+            minimizable: false,           // ❌ User can't minimize
+            maximizable: false,           // ❌ User can't maximize (it's already max)
+            movable: false,               // ❌ Can't drag it around
+            skipTaskbar: false,           // still show in taskbar if you want
             webPreferences: {
-                nodeIntegration: true,
-                contextIsolation: false,
-                enableRemoteModule: true
+                nodeIntegration: false,
+                contextIsolation: true,
+                enableRemoteModule: true,
+                preload: path.join(__dirname, 'preload.js')
             },
             icon: this.getIconPath(),
-            title: 'Pediatric Drug Calculator - Emergency Drug Dosing',
-            show: false, // Don't show until ready-to-show
             backgroundColor: '#2c3e50',
+            title: 'Pediatric Drug Calculator - Emergency Drug Dosing',
+            show: false,
             titleBarStyle: 'hidden',
         });
+        this.mainWindow.on('leave-full-screen', () => {
+            this.mainWindow.setFullScreen(true);
+        });
 
+        this.mainWindow.on('unmaximize', () => {
+            this.mainWindow.setFullScreen(true);
+        });
         // Load the app
-        this.mainWindow.loadFile('index.html');
-
+        this.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+        this.mainWindow.on('minimize', (event) => {
+            event.preventDefault();
+        });
+        this.mainWindow.setFullScreen(true);
+        this.mainWindow.setResizable(false);
+        this.mainWindow.setMovable(false);
+        
         // Remove menu completely for kiosk mode
         this.mainWindow.setMenuBarVisibility(false);
         this.mainWindow.autoHideMenuBar = true;

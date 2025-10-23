@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pediatric Drug Calculator</title>
+
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="../styles/index.css" />
+</head>
+
+<body class="bg-light">
+  <!-- ================================
+       Settings Modal
+  ===================================== -->
+  <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="settingsModalLabel">
+            <i class="bi bi-gear me-2"></i> Settings
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Startup toggle -->
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="autoLaunchToggle">
+            <label class="form-check-label" for="autoLaunchToggle">Start with Windows</label>
+          </div>
+
+          <!-- Always on top toggle -->
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="alwaysOnTopToggle">
+            <label class="form-check-label" for="alwaysOnTopToggle">Always on Top</label>
+          </div>
+
+          <!-- Theme toggle -->
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="darkThemeToggle">
+            <label class="form-check-label" for="darkThemeToggle">Dark Mode</label>
+          </div>
+
+          <hr>
+          <div class="small text-muted d-flex justify-content-between">
+            <span>App Version:</span>
+            <strong id="appVersionLabel">v1.0.0</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================
+       Title Bar
+  ===================================== -->
+  <div class="title-bar">
+    <div class="d-flex align-items-center gap-2">
+      <span class="app-title fw-semibold">Pediatric Drug Calculator</span>
+    </div>
+    <div class="title-bar-controls">
+      <button id="settingsBtn" class="control-btn" title="Settings"><i class="bi bi-gear"></i></button>
+      <button id="minimizeBtn" class="control-btn" title="Minimize">−</button>
+    </div>
+  </div>
+
+  <!-- ================================
+       Main Content
+  ===================================== -->
+  <div class="container-fluid px-4 py-3">
+
+    <!-- Header -->
+    <header class="text-center mb-4">
+      <div class="bg-primary text-white rounded-3 p-4 shadow">
+        <h1 class="display-5 fw-bold mb-2">
+          <i class="bi bi-heart-pulse me-2"></i>Pediatric Emergency Drug Calculator
+        </h1>
+        <p class="lead mb-3 opacity-75">Always Available Emergency & PRRT Medication Reference</p>
+        <div class="d-flex align-items-center justify-content-center">
+          <span class="status-dot me-2"></span>
+          <span class="small">Application is always running and starts with Windows</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Input Section -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+          
+          <!-- Weight Input -->
+          <div class="flex-grow-1" style="max-width: 500px;">
+            <div class="input-group input-group-lg">
+              <input
+                type="number"
+                class="form-control"
+                id="weight"
+                min="0.1"
+                max="150"
+                step="0.1"
+                placeholder="Enter weight"
+                autofocus
+              />
+              <span class="input-group-text bg-light fw-semibold">kg</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex flex-wrap gap-2 justify-content-end">
+            <button id="calculateBtn" class="btn btn-primary btn-lg px-4">
+              <i class="bi bi-calculator me-2"></i>Calculate All
+            </button>
+            <button id="exportBtn" class="btn btn-success btn-lg px-4" disabled>
+              <i class="bi bi-file-pdf me-2"></i>Export PDF
+            </button>
+            <button id="clearBtn" class="btn btn-outline-secondary btn-lg px-4">
+              <i class="bi bi-arrow-clockwise me-2"></i>Clear
+            </button>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Card -->
+    <div class="card summary-card shadow mb-4 d-none" id="summaryCard">
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col-md-3">
+            <div class="h4 mb-1" id="patientWeightDisplay">0 kg</div>
+            <small class="opacity-75">Patient Weight</small>
+          </div>
+          <div class="col-md-3">
+            <div class="h4 mb-1" id="totalMedsDisplay">0</div>
+            <small class="opacity-75">Total Medications</small>
+          </div>
+          <div class="col-md-3">
+            <div class="h4 mb-1" id="emergencyCount">0</div>
+            <small class="opacity-75">Emergency Drugs</small>
+          </div>
+          <div class="col-md-3">
+            <div class="h4 mb-1" id="prrtCount">0</div>
+            <small class="opacity-75">PRRT Drugs</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="card shadow">
+      <!-- Header -->
+      <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-primary fw-semibold">
+          <i class="bi bi-list-ul me-2"></i>Medication Results
+        </h5>
+        <span class="badge rounded-pill bg-secondary fs-6" id="resultsCount">
+          No calculations yet
+        </span>
+      </div>
+
+      <!-- Search & Filter Controls -->
+      <div class="px-3 pb-3 border-bottom">
+        <div class="row g-2 align-items-center">
+          <!-- Search Bar -->
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+              <input
+                type="text"
+                id="searchInput"
+                class="form-control"
+                placeholder="Search medication by name, route, or category"
+                aria-label="Search medications"
+              />
+            </div>
+          </div>
+
+          <!-- Filter Toggles -->
+          <div class="col-md-6 d-flex justify-content-md-end">
+            <div class="btn-group" role="group" aria-label="Filter medications">
+              <input type="radio" class="btn-check" name="filterGroup" id="filterAll" value="all" checked>
+              <label class="btn btn-outline-primary" for="filterAll">
+                <i class="bi bi-collection me-1"></i>All
+              </label>
+
+              <input type="radio" class="btn-check" name="filterGroup" id="filterEmergency" value="emergency">
+              <label class="btn btn-outline-danger" for="filterEmergency">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>Emergency
+              </label>
+
+              <input type="radio" class="btn-check" name="filterGroup" id="filterPRRT" value="prrt">
+              <label class="btn btn-outline-success" for="filterPRRT">
+                <i class="bi bi-activity me-1"></i>PRRT
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover medication-table align-middle mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th style="width: 120px;">Category</th>
+                <th>Medication</th>
+                <th class="text-center" style="width: 100px;">Volume (mL)</th>
+                <th class="text-center" style="width: 120px;">Total Dose</th>
+                <th class="text-center" style="width: 140px;">Concentration</th>
+                <th class="text-center" style="width: 80px;">Route</th>
+                <th style="width: 200px;">Clinical Notes</th>
+              </tr>
+            </thead>
+            <tbody id="all-results">
+              <tr>
+                <td colspan="7" class="text-center py-5 text-muted">
+                  <i class="bi bi-calculator display-4 d-block mb-3 opacity-50"></i>
+                  <div class="fs-5 fw-medium mb-2">Ready for Calculation</div>
+                  <div class="text-muted">
+                    Enter patient weight and click <strong>“Calculate All”</strong> to see results
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center text-muted small p-3 bg-white rounded shadow-sm">
+        <!-- Status Message -->
+        <span id="status" class="fw-medium d-flex align-items-center">
+          <i class="bi bi-info-circle me-2"></i>
+          Ready - Enter patient weight to calculate medication doses
+        </span>
+
+        <!-- Version + GitHub Link -->
+        <div class="d-flex align-items-center gap-3 mt-2 mt-md-0">
+          <span class="app-version text-primary fw-bold">
+            v1.0.0
+          </span>
+          <a href="https://github.com/yazen4Gamer" 
+            class="text-decoration-none d-flex align-items-center gap-1 text-dark"
+            target="_blank" rel="noopener noreferrer">
+            <i class="bi bi-github fs-5"></i>
+            <span class="fw-semibold">Yazen</span>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+  <!-- ================================
+       Scripts
+  ===================================== -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script type="module" src="./renderer.js"></script>
+</body>
+</html>

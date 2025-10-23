@@ -1,0 +1,126 @@
+/* ================================
+   Global Styles
+=================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ================================
+   Title Bar
+=================================== */
+.title-bar {
+  background: #2c3e50;
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #34495e;
+  -webkit-app-region: drag;
+}
+.title-bar-controls {
+  display: flex;
+  gap: 8px;
+  -webkit-app-region: no-drag;
+}
+.control-btn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+  transition: background 0.2s;
+}
+.control-btn:hover { background: rgba(255,255,255,0.2); }
+
+/* ================================
+   Status Dot
+=================================== */
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #2ecc71;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ================================
+   Table & Cards
+=================================== */
+.medication-table { font-size: 0.9em; }
+.table-hover tbody tr:hover {
+  background-color: rgba(52, 152, 219, 0.1) !important;
+}
+.dose-highlight { font-weight: 700; color: #e74c3c; font-size: 1.1em; }
+.concentration-cell {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85em;
+  background-color: #f8f9fa;
+}
+.notes-cell {
+  max-width: 200px;
+  font-size: 0.85em;
+  line-height: 1.3;
+}
+.summary-card {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+}
+
+/* ================================
+   Scrollbar
+=================================== */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+/* ================================
+   Focus & Dark Theme
+=================================== */
+.form-control:focus, .btn:focus {
+  box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+  border-color: #3498db;
+}
+body.dark-theme { background: #1e1e1e !important; color: #f1f1f1; }
+body.dark-theme .card { background-color: #2c2c2c; }
+body.dark-theme .table-dark { background: #121212 !important; }
+body.dark-theme .btn-outline-primary { color: #ccc; border-color: #444; }
+
+/* ================================
+   Responsive
+=================================== */
+@media (max-width: 768px) {
+  .table-responsive { font-size: 0.8em; }
+  .dose-highlight { font-size: 1em; }
+}
+
+/* ================================
+   Print Mode
+=================================== */
+@media print {
+  body { background: white !important; }
+  .title-bar, .btn, .summary-card, footer { display: none !important; }
+  .card { border: none !important; box-shadow: none !important; }
+  .table-dark { background: #2c3e50 !important; color: white !important; }
+}
