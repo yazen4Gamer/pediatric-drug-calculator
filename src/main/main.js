@@ -1,11 +1,7 @@
+// main.js
 const { app, BrowserWindow, Menu, dialog, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
-
-// Remove these global variables - they're handled in the class
-// let AutoLaunch;
-// let autoLauncherInstance;
-// let mainWindow;
 
 class AppWindow {
     constructor() {
@@ -19,12 +15,12 @@ class AppWindow {
 
     initializeAutoLaunch() {
         try {
-            // Use dynamic import to avoid issues if module fails
-            const AutoLaunch = require('auto-launch');
+            // ✅ Use electron-auto-launch instead of auto-launch
+            const AutoLaunch = require('electron-auto-launch');
             this.appLauncher = new AutoLaunch({
                 name: 'Pediatric Drug Calculator',
                 path: app.getPath('exe'),
-                isHidden: false
+                isHidden: false,
             });
             console.log('Auto-launch initialized successfully');
         } catch (error) {
@@ -34,20 +30,19 @@ class AppWindow {
     }
 
     createWindow() {
-        // Create the browser window - REMOVED FULLSCREEN for better usability
         this.mainWindow = new BrowserWindow({
-            fullscreen: true,              // 👈 Always fullscreen
-            frame: false,                  // No OS frame
-            resizable: false,             // ❌ User can't resize
-            minimizable: false,           // ❌ User can't minimize
-            maximizable: false,           // ❌ User can't maximize (it's already max)
-            movable: false,               // ❌ Can't drag it around
-            skipTaskbar: false,           // still show in taskbar if you want
+            fullscreen: true,
+            frame: false,
+            resizable: false,
+            minimizable: false,
+            maximizable: false,
+            movable: false,
+            skipTaskbar: false,
             webPreferences: {
                 nodeIntegration: false,
                 contextIsolation: true,
                 enableRemoteModule: true,
-                preload: path.join(__dirname, 'preload.js')
+                preload: path.join(__dirname, 'preload.js'),
             },
             icon: this.getIconPath(),
             backgroundColor: '#2c3e50',
@@ -55,33 +50,30 @@ class AppWindow {
             show: false,
             titleBarStyle: 'hidden',
         });
+
+        // Always force fullscreen
         this.mainWindow.on('leave-full-screen', () => {
             this.mainWindow.setFullScreen(true);
         });
-
         this.mainWindow.on('unmaximize', () => {
             this.mainWindow.setFullScreen(true);
         });
-        // Load the app
+
         this.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
-        this.mainWindow.on('minimize', (event) => {
-            event.preventDefault();
-        });
+        this.mainWindow.on('minimize', (event) => event.preventDefault());
+
         this.mainWindow.setFullScreen(true);
         this.mainWindow.setResizable(false);
         this.mainWindow.setMovable(false);
-        
-        // Remove menu completely for kiosk mode
+
         this.mainWindow.setMenuBarVisibility(false);
         this.mainWindow.autoHideMenuBar = true;
 
-        // Show window when ready to prevent visual flash
         this.mainWindow.once('ready-to-show', () => {
             this.mainWindow.show();
             this.mainWindow.focus();
         });
 
-        // Prevent window from being closed
         this.mainWindow.on('close', (event) => {
             if (!this.isQuitting) {
                 event.preventDefault();
@@ -89,30 +81,23 @@ class AppWindow {
             }
         });
 
-        // Handle window closed
         this.mainWindow.on('closed', () => {
             this.mainWindow = null;
         });
 
-        // Handle window focus
         this.mainWindow.on('focus', () => {
             this.mainWindow.webContents.send('window-focused');
         });
-
-        // Handle window blur
         this.mainWindow.on('blur', () => {
             this.mainWindow.webContents.send('window-blurred');
         });
 
-        // Open DevTools in development
         if (process.env.NODE_ENV === 'development') {
             this.mainWindow.webContents.openDevTools();
         }
 
-        // Setup auto-launch
         this.setupAutoLaunch();
 
-        // Handle external links
         this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
             shell.openExternal(url);
             return { action: 'deny' };
@@ -121,7 +106,6 @@ class AppWindow {
 
     getIconPath() {
         try {
-            // Try different possible icon locations
             const iconPaths = [
                 path.join(__dirname, 'assets', 'icon.png'),
                 path.join(__dirname, 'assets', 'icon.ico'),
@@ -130,32 +114,23 @@ class AppWindow {
                 path.join(process.resourcesPath, 'assets', 'icon.png'),
                 path.join(process.resourcesPath, 'assets', 'icon.ico'),
             ];
-
             for (const iconPath of iconPaths) {
-                if (fs.existsSync(iconPath)) {
-                    return iconPath;
-                }
+                if (fs.existsSync(iconPath)) return iconPath;
             }
         } catch (error) {
             console.warn('Could not find app icon:', error.message);
         }
-        return undefined; // Use default Electron icon
+        return undefined;
     }
 
     minimizeToTray() {
-        if (this.mainWindow) {
-            if (process.platform === 'darwin') {
-                // On macOS, hide the window instead of minimizing
-                this.mainWindow.hide();
-            } else {
-                this.mainWindow.minimize();
-            }
-        }
+        if (!this.mainWindow) return;
+        if (process.platform === 'darwin') this.mainWindow.hide();
+        else this.mainWindow.minimize();
     }
 
     async setupAutoLaunch() {
         try {
-            // Only enable auto-launch in production and if appLauncher is available
             if (process.env.NODE_ENV !== 'development' && this.appLauncher) {
                 const isEnabled = await this.appLauncher.isEnabled();
                 if (!isEnabled) {
@@ -165,11 +140,10 @@ class AppWindow {
                     console.log('Auto-start is already enabled');
                 }
             } else if (!this.appLauncher) {
-                console.warn('Auto-launch not available - running in development mode or module failed to load');
+                console.warn('Auto-launch not available in development or module failed');
             }
         } catch (error) {
             console.error('Auto-start setup failed:', error.message);
-            // Don't show error dialog for auto-start failures as they're not critical
         }
     }
 
@@ -203,9 +177,7 @@ class AppWindow {
 
     async getAutoLaunchStatus() {
         try {
-            if (this.appLauncher) {
-                return await this.appLauncher.isEnabled();
-            }
+            if (this.appLauncher) return await this.appLauncher.isEnabled();
             return false;
         } catch (error) {
             console.error('Failed to get auto-start status:', error);
@@ -214,18 +186,14 @@ class AppWindow {
     }
 
     toggleFullscreen() {
-        if (this.mainWindow) {
-            const isFullscreen = this.mainWindow.isFullScreen();
-            this.mainWindow.setFullScreen(!isFullscreen);
-            
-            // Send event to renderer
-            this.mainWindow.webContents.send('fullscreen-changed', !isFullscreen);
-        }
+        if (!this.mainWindow) return;
+        const isFullscreen = this.mainWindow.isFullScreen();
+        this.mainWindow.setFullScreen(!isFullscreen);
+        this.mainWindow.webContents.send('fullscreen-changed', !isFullscreen);
     }
 
     showExitConfirmation() {
         if (!this.mainWindow) return false;
-
         const choice = dialog.showMessageBoxSync(this.mainWindow, {
             type: 'question',
             buttons: ['Cancel', 'Exit Anyway'],
@@ -235,27 +203,21 @@ class AppWindow {
             message: 'Exit Pediatric Drug Calculator?',
             detail: 'This application is designed to run continuously for emergency access. Are you sure you want to exit?'
         });
-
-        return choice === 1; // Return true if user chose "Exit Anyway"
+        return choice === 1;
     }
 
     exitApp() {
         this.isQuitting = true;
-        
-        // Save any pending data or state here if needed
         this.saveApplicationState();
-        
         app.quit();
     }
 
     saveApplicationState() {
-        // Save current application state to a file if needed
         try {
             const state = {
                 lastUsed: new Date().toISOString(),
-                version: app.getVersion()
+                version: app.getVersion(),
             };
-            
             const statePath = path.join(app.getPath('userData'), 'app-state.json');
             fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
         } catch (error) {
@@ -264,45 +226,27 @@ class AppWindow {
     }
 
     restoreWindow() {
-        if (this.mainWindow) {
-            if (this.mainWindow.isMinimized()) {
-                this.mainWindow.restore();
-            }
-            this.mainWindow.show();
-            this.mainWindow.focus();
-            
-            // Bring to front
-            this.mainWindow.setAlwaysOnTop(true);
-            setTimeout(() => {
-                this.mainWindow.setAlwaysOnTop(false);
-            }, 100);
-        }
+        if (!this.mainWindow) return;
+        if (this.mainWindow.isMinimized()) this.mainWindow.restore();
+        this.mainWindow.show();
+        this.mainWindow.focus();
+        this.mainWindow.setAlwaysOnTop(true);
+        setTimeout(() => this.mainWindow.setAlwaysOnTop(false), 100);
     }
 
-    // Add this missing method
     setAlwaysOnTop(alwaysOnTop) {
-        if (this.mainWindow) {
-            this.mainWindow.setAlwaysOnTop(alwaysOnTop);
-        }
+        if (this.mainWindow) this.mainWindow.setAlwaysOnTop(alwaysOnTop);
     }
 }
 
 // Create instance
 const appWindow = new AppWindow();
 
-// App event handlers
 app.whenReady().then(() => {
     appWindow.createWindow();
-    
-    // IPC handlers for window control
-    ipcMain.handle('minimize-window', () => {
-        appWindow.minimizeToTray();
-    });
 
-    ipcMain.handle('toggle-fullscreen', () => {
-        appWindow.toggleFullscreen();
-    });
-
+    ipcMain.handle('minimize-window', () => appWindow.minimizeToTray());
+    ipcMain.handle('toggle-fullscreen', () => appWindow.toggleFullscreen());
     ipcMain.handle('exit-app', () => {
         if (appWindow.showExitConfirmation()) {
             appWindow.exitApp();
@@ -311,67 +255,38 @@ app.whenReady().then(() => {
         return false;
     });
 
-    // Auto-launch management IPC handlers
-    ipcMain.handle('enable-auto-launch', async () => {
-        return await appWindow.enableAutoLaunch();
-    });
+    // Auto-launch IPC
+    ipcMain.handle('enable-auto-launch', () => appWindow.enableAutoLaunch());
+    ipcMain.handle('disable-auto-launch', () => appWindow.disableAutoLaunch());
+    ipcMain.handle('get-auto-launch-status', () => appWindow.getAutoLaunchStatus());
+    ipcMain.handle('set-auto-launch', async (event, enabled) =>
+        enabled ? appWindow.enableAutoLaunch() : appWindow.disableAutoLaunch()
+    );
 
-    ipcMain.handle('disable-auto-launch', async () => {
-        return await appWindow.disableAutoLaunch();
-    });
-
-    ipcMain.handle('get-auto-launch-status', async () => {
-        return await appWindow.getAutoLaunchStatus();
-    });
-
-    ipcMain.handle('set-auto-launch', async (event, enabled) => {
-        if (enabled) {
-            return await appWindow.enableAutoLaunch();
-        } else {
-            return await appWindow.disableAutoLaunch();
-        }
-    });
-
-    // Add missing IPC handler for always-on-top
-    ipcMain.handle('set-always-on-top', async (event, enabled) => {
+    ipcMain.handle('set-always-on-top', (event, enabled) => {
         appWindow.setAlwaysOnTop(enabled);
         return true;
     });
-
 }).catch(console.error);
 
 // Prevent multiple instances
 const gotTheLock = app.requestSingleInstanceLock();
-
 if (!gotTheLock) {
-    // Another instance is already running, focus it and quit
     app.quit();
 } else {
-    app.on('second-instance', (event, commandLine, workingDirectory) => {
-        // Someone tried to run a second instance, focus our window instead
+    app.on('second-instance', (event, commandLine) => {
         appWindow.restoreWindow();
-        
-        // Handle deep linking or command line arguments if needed
-        if (commandLine.length > 1) {
-            // Process command line arguments
-            console.log('Command line arguments:', commandLine);
-        }
+        if (commandLine.length > 1) console.log('Command line arguments:', commandLine);
     });
 }
 
-app.on('window-all-closed', (event) => {
-    // Don't prevent default - let the app decide whether to quit
-    // On macOS, keep app running even when all windows are closed
-    if (process.platform !== 'darwin') {
-        // For Windows/Linux, minimize to tray instead of quitting
-        if (appWindow.mainWindow) {
-            appWindow.minimizeToTray();
-        }
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin' && appWindow.mainWindow) {
+        appWindow.minimizeToTray();
     }
 });
 
 app.on('activate', () => {
-    // On macOS, re-create window when dock icon is clicked
     if (BrowserWindow.getAllWindows().length === 0) {
         appWindow.createWindow();
     } else {
@@ -386,38 +301,25 @@ app.on('before-quit', (event) => {
     }
 });
 
-app.on('will-quit', (event) => {
-    // Perform any final cleanup here
+app.on('will-quit', () => {
     console.log('Application is quitting...');
 });
 
 app.on('web-contents-created', (event, contents) => {
-    // Prevent navigation to external websites
     contents.on('will-navigate', (event, navigationUrl) => {
         const parsedUrl = new URL(navigationUrl);
-        
         if (parsedUrl.origin !== 'file://') {
             event.preventDefault();
             shell.openExternal(navigationUrl);
         }
     });
-});
 
-// Handle protocol for deep linking (optional)
-app.setAsDefaultProtocolClient('pediatric-calculator');
-
-// Security: Prevent new window creation
-app.on('web-contents-created', (event, contents) => {
     contents.on('new-window', (event, navigationUrl) => {
         event.preventDefault();
         shell.openExternal(navigationUrl);
     });
 });
 
-// Enable this for production to ignore certificate errors (if needed)
-// app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
-//     event.preventDefault();
-//     callback(true);
-// });
+app.setAsDefaultProtocolClient('pediatric-calculator');
 
-console.log('Pediatric Drug Calculator started successfully');
+console.log('✅ Pediatric Drug Calculator started successfully');

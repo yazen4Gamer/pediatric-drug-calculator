@@ -23,8 +23,8 @@
     "electron-builder": "^24.13.3"
   },
   "dependencies": {
-    "auto-launch": "^5.0.6",
     "bootstrap": "^5.3.8",
+    "electron-auto-launch": "^5.0.7",
     "electron-updater": "^5.0.0",
     "html2canvas": "^1.4.1",
     "mathjs": "^15.0.0"
