@@ -39,7 +39,7 @@
       "**/*"
     ],
     "asarUnpack": [
-      "node_modules/auto-launch/**"
+      "node_modules/electron-auto-launch/**"
     ],
     "win": {
       "target": "nsis",
