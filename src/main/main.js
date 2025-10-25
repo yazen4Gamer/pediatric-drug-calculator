@@ -3,11 +3,6 @@ const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-let isElevated;
-(async () => {
-  isElevated = (await import('is-elevated')).default;
-})();
-
 class AppWindow {
     constructor() {
         this.mainWindow = null;
@@ -20,25 +15,24 @@ class AppWindow {
 
     initializeAutoLaunch() {
         try {
-            // ✅ Use electron-auto-launch instead of auto-launch
             const AutoLaunch = require('electron-auto-launch');
             this.appLauncher = new AutoLaunch({
                 name: 'Pediatric Drug Calculator',
                 path: app.getPath('exe'),
                 isHidden: false,
             });
-            console.log('Auto-launch initialized successfully');
+            console.log('✅ Auto-launch initialized successfully');
         } catch (error) {
-            console.error('Auto-launch initialization failed:', error.message);
+            console.error('❌ Auto-launch initialization failed:', error.message);
             this.appLauncher = null;
         }
     }
 
     createWindow() {
         this.mainWindow = new BrowserWindow({
-            fullscreen: true,
+            fullscreen: app.isPackaged,         // Fullscreen in production only
             frame: false,
-            resizable: false,
+            resizable: !app.isPackaged,         // Allow resizing in dev
             minimizable: false,
             maximizable: false,
             movable: false,
@@ -56,20 +50,18 @@ class AppWindow {
             titleBarStyle: 'hidden',
         });
 
-        // Always force fullscreen
-        this.mainWindow.on('leave-full-screen', () => {
-            this.mainWindow.setFullScreen(true);
-        });
-        this.mainWindow.on('unmaximize', () => {
-            this.mainWindow.setFullScreen(true);
-        });
+        // Force fullscreen in production (kiosk)
+        if (app.isPackaged) {
+            this.mainWindow.on('leave-full-screen', () => {
+                this.mainWindow.setFullScreen(true);
+            });
+            this.mainWindow.on('unmaximize', () => {
+                this.mainWindow.setFullScreen(true);
+            });
+        }
 
         this.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
         this.mainWindow.on('minimize', (event) => event.preventDefault());
-
-        this.mainWindow.setFullScreen(true);
-        this.mainWindow.setResizable(false);
-        this.mainWindow.setMovable(false);
 
         this.mainWindow.setMenuBarVisibility(false);
         this.mainWindow.autoHideMenuBar = true;
@@ -93,16 +85,20 @@ class AppWindow {
         this.mainWindow.on('focus', () => {
             this.mainWindow.webContents.send('window-focused');
         });
+
         this.mainWindow.on('blur', () => {
             this.mainWindow.webContents.send('window-blurred');
         });
 
-        if (process.env.NODE_ENV === 'development') {
+        // Open DevTools only in development
+        if (!app.isPackaged) {
             this.mainWindow.webContents.openDevTools();
         }
 
+        // Enable auto-launch
         this.setupAutoLaunch();
 
+        // Handle external links safely
         this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
             shell.openExternal(url);
             return { action: 'deny' };
@@ -123,7 +119,7 @@ class AppWindow {
                 if (fs.existsSync(iconPath)) return iconPath;
             }
         } catch (error) {
-            console.warn('Could not find app icon:', error.message);
+            console.warn('⚠️ Could not find app icon:', error.message);
         }
         return undefined;
     }
@@ -136,40 +132,32 @@ class AppWindow {
 
     async setupAutoLaunch() {
         try {
-            const isElevated = (await import('is-elevated')).default;
-            const elevated = await isElevated();
-            if (!elevated) {
-                console.warn('Skipping auto-launch setup — not running as admin.');
-                return;
-            }
-
             if (process.env.NODE_ENV !== 'development' && this.appLauncher) {
                 const isEnabled = await this.appLauncher.isEnabled();
                 if (!isEnabled) {
                     await this.appLauncher.enable();
-                    console.log('Auto-start enabled successfully');
+                    console.log('🚀 Auto-start enabled successfully');
                 } else {
-                    console.log('Auto-start is already enabled');
+                    console.log('ℹ️ Auto-start is already enabled');
                 }
             } else if (!this.appLauncher) {
-                console.warn('Auto-launch not available - dev mode or module missing');
+                console.warn('⚠️ Auto-launch not available - dev mode or module missing');
             }
         } catch (error) {
-            console.error('Auto-start setup failed:', error.message);
+            console.error('❌ Auto-start setup failed:', error.message);
         }
     }
-
 
     async enableAutoLaunch() {
         try {
             if (this.appLauncher) {
                 await this.appLauncher.enable();
-                console.log('Auto-start enabled');
+                console.log('✅ Auto-start enabled');
                 return true;
             }
             return false;
         } catch (error) {
-            console.error('Failed to enable auto-start:', error);
+            console.error('❌ Failed to enable auto-start:', error);
             return false;
         }
     }
@@ -178,12 +166,12 @@ class AppWindow {
         try {
             if (this.appLauncher) {
                 await this.appLauncher.disable();
-                console.log('Auto-start disabled');
+                console.log('✅ Auto-start disabled');
                 return true;
             }
             return false;
         } catch (error) {
-            console.error('Failed to disable auto-start:', error);
+            console.error('❌ Failed to disable auto-start:', error);
             return false;
         }
     }
@@ -193,7 +181,7 @@ class AppWindow {
             if (this.appLauncher) return await this.appLauncher.isEnabled();
             return false;
         } catch (error) {
-            console.error('Failed to get auto-start status:', error);
+            console.error('❌ Failed to get auto-start status:', error);
             return false;
         }
     }
@@ -234,7 +222,7 @@ class AppWindow {
             const statePath = path.join(app.getPath('userData'), 'app-state.json');
             fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
         } catch (error) {
-            console.warn('Could not save application state:', error.message);
+            console.warn('⚠️ Could not save application state:', error.message);
         }
     }
 
@@ -252,21 +240,12 @@ class AppWindow {
     }
 }
 
-// Create instance
+// -------------------------------------------
+// App Lifecycle
+// -------------------------------------------
 const appWindow = new AppWindow();
 
-app.whenReady().then(async () => {
-    const isElevated = (await import('is-elevated')).default;
-    const elevated = await isElevated();
-    if (!elevated) {
-      dialog.showMessageBoxSync({
-        type: 'warning',
-        title: 'Permission Required',
-        message: 'Administrative privileges are recommended to enable Auto-Start.',
-        detail: 'You can continue using the app normally, but Auto-Start will not work unless the application is run as Administrator.',
-        buttons: ['OK']
-      });
-    }
+app.whenReady().then(() => {
     appWindow.createWindow();
 
     ipcMain.handle('minimize-window', () => appWindow.minimizeToTray());
@@ -326,7 +305,7 @@ app.on('before-quit', (event) => {
 });
 
 app.on('will-quit', () => {
-    console.log('Application is quitting...');
+    console.log('🚪 Application is quitting...');
 });
 
 app.on('web-contents-created', (event, contents) => {
@@ -344,6 +323,7 @@ app.on('web-contents-created', (event, contents) => {
     });
 });
 
+// Register custom protocol (optional)
 app.setAsDefaultProtocolClient('pediatric-calculator');
 
 console.log('✅ Pediatric Drug Calculator started successfully');

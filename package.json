@@ -27,7 +27,6 @@
     "electron-auto-launch": "^5.0.7",
     "electron-updater": "^5.0.0",
     "html2canvas": "^1.4.1",
-    "is-elevated": "^4.0.0",
     "mathjs": "^15.0.0"
   },
   "build": {
@@ -44,7 +43,8 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "requestedExecutionLevel": "requireAdministrator"
     },
     "nsis": {
       "oneClick": false,
