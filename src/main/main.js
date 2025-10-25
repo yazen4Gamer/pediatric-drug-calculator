@@ -1,5 +1,5 @@
 // main.js
-const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, Menu, dialog, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -30,9 +30,9 @@ class AppWindow {
 
     createWindow() {
         this.mainWindow = new BrowserWindow({
-            fullscreen: app.isPackaged,         // Fullscreen in production only
+            fullscreen: true,
             frame: false,
-            resizable: !app.isPackaged,         // Allow resizing in dev
+            resizable: false,
             minimizable: false,
             maximizable: false,
             movable: false,
@@ -50,18 +50,20 @@ class AppWindow {
             titleBarStyle: 'hidden',
         });
 
-        // Force fullscreen in production (kiosk)
-        if (app.isPackaged) {
-            this.mainWindow.on('leave-full-screen', () => {
-                this.mainWindow.setFullScreen(true);
-            });
-            this.mainWindow.on('unmaximize', () => {
-                this.mainWindow.setFullScreen(true);
-            });
-        }
+        // Always force fullscreen
+        this.mainWindow.on('leave-full-screen', () => {
+            this.mainWindow.setFullScreen(true);
+        });
+        this.mainWindow.on('unmaximize', () => {
+            this.mainWindow.setFullScreen(true);
+        });
 
         this.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
         this.mainWindow.on('minimize', (event) => event.preventDefault());
+
+        this.mainWindow.setFullScreen(true);
+        this.mainWindow.setResizable(false);
+        this.mainWindow.setMovable(false);
 
         this.mainWindow.setMenuBarVisibility(false);
         this.mainWindow.autoHideMenuBar = true;
@@ -90,15 +92,12 @@ class AppWindow {
             this.mainWindow.webContents.send('window-blurred');
         });
 
-        // Open DevTools only in development
-        if (!app.isPackaged) {
+        if (process.env.NODE_ENV === 'development') {
             this.mainWindow.webContents.openDevTools();
         }
 
-        // Enable auto-launch
         this.setupAutoLaunch();
 
-        // Handle external links safely
         this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
             shell.openExternal(url);
             return { action: 'deny' };
@@ -132,6 +131,13 @@ class AppWindow {
 
     async setupAutoLaunch() {
         try {
+            const isElevated = (await import('is-elevated')).default;
+            const elevated = await isElevated();
+            if (!elevated) {
+                console.warn('⚠️ Skipping auto-launch setup — not running as admin.');
+                return;
+            }
+
             if (process.env.NODE_ENV !== 'development' && this.appLauncher) {
                 const isEnabled = await this.appLauncher.isEnabled();
                 if (!isEnabled) {
@@ -245,6 +251,20 @@ class AppWindow {
 // -------------------------------------------
 const appWindow = new AppWindow();
 
+(async () => {
+  const isElevated = (await import('is-elevated')).default;
+  const elevated = await isElevated();
+  if (!elevated) {
+    dialog.showMessageBoxSync({
+      type: 'warning',
+      title: 'Permission Required',
+      message: 'Administrative privileges are recommended to enable Auto-Start.',
+      detail: 'You can continue using the app normally, but Auto-Start will not work unless the application is run as Administrator.',
+      buttons: ['OK']
+    });
+  }
+})();
+
 app.whenReady().then(() => {
     appWindow.createWindow();
 
@@ -323,7 +343,6 @@ app.on('web-contents-created', (event, contents) => {
     });
 });
 
-// Register custom protocol (optional)
 app.setAsDefaultProtocolClient('pediatric-calculator');
 
 console.log('✅ Pediatric Drug Calculator started successfully');
