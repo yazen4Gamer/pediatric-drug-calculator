@@ -1,7 +1,12 @@
 // main.js
-const { app, BrowserWindow, Menu, dialog, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+
+let isElevated;
+(async () => {
+  isElevated = (await import('is-elevated')).default;
+})();
 
 class AppWindow {
     constructor() {
@@ -131,6 +136,13 @@ class AppWindow {
 
     async setupAutoLaunch() {
         try {
+            const isElevated = (await import('is-elevated')).default;
+            const elevated = await isElevated();
+            if (!elevated) {
+                console.warn('Skipping auto-launch setup — not running as admin.');
+                return;
+            }
+
             if (process.env.NODE_ENV !== 'development' && this.appLauncher) {
                 const isEnabled = await this.appLauncher.isEnabled();
                 if (!isEnabled) {
@@ -140,12 +152,13 @@ class AppWindow {
                     console.log('Auto-start is already enabled');
                 }
             } else if (!this.appLauncher) {
-                console.warn('Auto-launch not available in development or module failed');
+                console.warn('Auto-launch not available - dev mode or module missing');
             }
         } catch (error) {
             console.error('Auto-start setup failed:', error.message);
         }
     }
+
 
     async enableAutoLaunch() {
         try {
@@ -242,7 +255,18 @@ class AppWindow {
 // Create instance
 const appWindow = new AppWindow();
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+    const isElevated = (await import('is-elevated')).default;
+    const elevated = await isElevated();
+    if (!elevated) {
+      dialog.showMessageBoxSync({
+        type: 'warning',
+        title: 'Permission Required',
+        message: 'Administrative privileges are recommended to enable Auto-Start.',
+        detail: 'You can continue using the app normally, but Auto-Start will not work unless the application is run as Administrator.',
+        buttons: ['OK']
+      });
+    }
     appWindow.createWindow();
 
     ipcMain.handle('minimize-window', () => appWindow.minimizeToTray());
