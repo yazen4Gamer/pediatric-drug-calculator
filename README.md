@@ -1,83 +1,72 @@
-# 🩺 Pediatric Drug Calculator
+# 🩺 Pediatric Emergency Drug Calculator
 
-A **fast, always-on, offline** medication dosage calculator built for **pediatric emergencies** and **PRRT (Pediatric Resuscitation Reference Table)** use.  
-Developed with [Electron](https://www.electronjs.org/) and [Bootstrap](https://getbootstrap.com/) to provide a **clean**, **full-screen**, and **reliable** interface for **emergency rooms**, **ICUs**, and **bedside use**.
+![Pediatric Drug Calculator](https://img.shields.io/badge/Platform-Windows-blue?style=for-the-badge)
+![Electron](https://img.shields.io/badge/Built%20with-Electron-47848F?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-2.0.0-green?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
----
+> **A professional, always-available pediatric medication calculator for emergency and critical care settings**
 
-## 📥 Download
-
-👉 [**Download the latest release**](https://github.com/yazen4Gamer/pediatric-drug-calculator/releases)
-
-> ⚠️ **Important:**  
-> After installation, right-click the app and choose **“Run as Administrator”** to enable auto-start functionality.  
-> The app will still run without it, but auto-launch will not be enabled unless elevated permissions are granted.
+![Pediatric Drug Calculator Interface](assets/pediatric-drug-calculator-preview.png)
 
 ---
 
-## 🚀 Key Features
+## 🚨 Why This Tool Exists
 
-- 🖥️ **Auto-Start on Boot** – Launches automatically when the system starts.  
-- 🧭 **Fullscreen Kiosk Mode** – Prevents accidental closing during emergencies.  
-- 🩹 **Dual Modes:**  
-  - 🚨 **Emergency Mode:** Rapid mL dose calculation using weight-based equations.  
-  - 💉 **PRRT Mode:** Advanced mg/kg dosing with min/max validation.  
-- ⚖️ **Shared Weight Input** – One input updates all calculations simultaneously.  
-- 🧾 **PDF Export** – Clean print-ready reference sheets for documentation.  
-- 🪄 **Bootstrap UI** – Fast and responsive user interface.  
-- 📴 **Offline First** – No internet connection required once installed.
+In pediatric emergencies, every second counts. This application provides **instant, reliable medication calculations** for healthcare professionals, eliminating manual math errors and saving critical time during resuscitation scenarios.
 
 ---
 
-## 📊 Example Table (Emergency Mode)
+## ✨ Key Features
 
-| Medication               | Route | Equation     | Volume (mL) | Min | Max |
-|---------------------------|-------|--------------|------------|-----|-----|
-| Epinephrine 1:10,000      | IV    | 0.1 × W      | 2.0        | 0   | 10  |
-| Atropine 0.5 mg/mL        | IV    | 0.04 × W     | 0.8        | 0.2 | 1.0 |
-| Adenosine 1st             | IV    | 0.033 × W    | 0.66       | 0   | 6   |
+### 🎯 **Core Functionality**
+- **⚡ Instant Calculations** - Real-time dose calculations as you type
+- **🏥 Dual Medication Databases** - Emergency drugs + PRRT protocols
+- **📊 Professional Visualization** - Interactive charts and analytics
+- **🔒 Offline Operation** - No internet required after installation
 
----
+### 🎨 **Smart Interface**
+- **🌙 Dark/Light Themes** - Reduce eye strain during extended use
+- **🚨 Emergency Mode** - High-visibility mode for critical situations
+- **🔍 Advanced Filtering** - Search by medication, route, or category
+- **📱 Responsive Design** - Optimized for various screen sizes
 
-## 🧮 Calculation Modes
-
-### 🚨 Emergency Mode
-Uses predefined equations like `0.1 × weight` to calculate critical medication volumes instantly.
-
-### 💉 PRRT Mode
-Performs mg/kg dosing calculations with concentration and min/max validation — ideal for weight-based pediatric resuscitation protocols.
-
----
-
-## 🛡️ Safety Features
-
-- ✅ Validates doses and volumes against safe ranges  
-- ⚠️ Warns if limits are exceeded  
-- 🖥️ Locks in kiosk mode to avoid accidental closure  
-- 🔒 Secure exit flow for controlled shutdown
+### 💾 **Professional Features**
+- **📄 PDF Export** - Generate professional patient reports
+- **⚙️ Customizable Settings** - Decimal precision, auto-calculation, and more
+- **📈 Data Visualization** - Medication distribution charts
+- **🔄 Quick Actions** - One-click common pediatric weights
 
 ---
 
-## 🧰 Tech Stack
+## 🖥️ System Requirements
 
-- ⚡ [Electron](https://www.electronjs.org/) — cross-platform desktop framework  
-- 💻 [Bootstrap](https://getbootstrap.com/) — responsive UI  
-- 🧮 [mathjs](https://mathjs.org/) — safe math parsing  
-- 📝 [html2canvas](https://html2canvas.hertzen.com/) & [jsPDF](https://github.com/parallax/jsPDF) — PDF export
+- **Windows 10/11** (64-bit)
+- **100MB** free disk space
+- **Screen resolution**: 1024x768 or higher
 
 ---
 
-## 🧪 Developer Setup
+## 📥 Installation & Setup
 
-```bash
-# Clone the repository
-git clone https://github.com/yazen4Gamer/pediatric-drug-calculator.git
+### Method 1: Direct Download (Recommended)
+1. **Download** the latest release from our [Releases Page](https://github.com/yazen4Gamer/pediatric-drug-calculator/releases)
+2. **Run** the installer (`PediatricDrugCalculator-Setup-2.0.0.exe`)
+3. **Launch** the application from your Start Menu or Desktop
 
-# Enter the project directory
-cd pediatric-drug-calculator
+### Method 2: Portable Version
+1. Download the portable ZIP from [Releases](https://github.com/yazen4Gamer/pediatric-drug-calculator/releases)
+2. Extract to your preferred location
+3. Run `Pediatric Drug Calculator.exe`
 
-# Install dependencies
-npm install
+> **💡 Pro Tip**: Pin the application to your taskbar for quick access during emergencies.
 
-# Run the app in development mode
-npm run dev
+---
+
+## 🚀 Quick Start Guide
+
+### 1. **Basic Calculation**
+```plaintext
+1. Enter patient weight in kilograms
+2. Click "Calculate All" or let auto-calculate work
+3. View all medication doses instantly
