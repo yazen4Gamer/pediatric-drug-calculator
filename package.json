@@ -46,7 +46,7 @@
     "win": {
       "target": "nsis",
       "icon": "assets/icon.ico",
-      "requestedExecutionLevel": "requireAdministrator"
+      "requestedExecutionLevel": "asInvoker"  
     },
     "nsis": {
       "oneClick": false,
@@ -55,9 +55,8 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Pediatric Drug Calculator",
       "runAfterFinish": true,
-      "perMachine": true,
-      "allowElevation": true,
-      "include": "build/installer.nsh"
+      "perMachine": false,                     
+      "allowElevation": true                   
     }
   }
 }
