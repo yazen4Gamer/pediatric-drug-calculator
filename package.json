@@ -1,6 +1,6 @@
 {
   "name": "pediatric-drug-calculator",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Pediatric Medication Dose Calculator - Always Available Emergency Reference",
   "main": "./src/main/main.js",
   "scripts": {
