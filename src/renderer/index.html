@@ -8,6 +8,9 @@
   <!-- Bootstrap & Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
+  
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Custom Styles -->
   <link rel="stylesheet" href="../styles/index.css" />
@@ -45,11 +48,77 @@
             <label class="form-check-label" for="darkThemeToggle">Dark Mode</label>
           </div>
 
+          <!-- Auto-calculate toggle -->
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="autoCalculateToggle" checked>
+            <label class="form-check-label" for="autoCalculateToggle">Auto-calculate on weight change</label>
+          </div>
+
+          <!-- Precision settings -->
+          <div class="mb-3">
+            <label for="decimalPrecision" class="form-label">Decimal Precision</label>
+            <select class="form-select" id="decimalPrecision">
+              <option value="1">1 decimal (0.1)</option>
+              <option value="2" selected>2 decimals (0.01)</option>
+              <option value="3">3 decimals (0.001)</option>
+            </select>
+          </div>
+
           <hr>
           <div class="small text-muted d-flex justify-content-between">
             <span>App Version:</span>
-            <strong id="appVersionLabel">v1.0.0</strong>
+            <strong id="appVersionLabel">v2.0.0</strong>
           </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================
+       Quick Actions Modal
+  ===================================== -->
+  <div class="modal fade" id="quickActionsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title">
+            <i class="bi bi-lightning me-2"></i>Quick Actions
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-2">
+            <div class="col-6">
+              <button class="btn btn-outline-primary w-100 h-100 p-3 quick-weight-btn" data-weight="5">
+                <div class="h5 mb-1">5 kg</div>
+                <small>Infant</small>
+              </button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-outline-primary w-100 h-100 p-3 quick-weight-btn" data-weight="10">
+                <div class="h5 mb-1">10 kg</div>
+                <small>Toddler</small>
+              </button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-outline-primary w-100 h-100 p-3 quick-weight-btn" data-weight="20">
+                <div class="h5 mb-1">20 kg</div>
+                <small>Child</small>
+              </button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-outline-primary w-100 h-100 p-3 quick-weight-btn" data-weight="40">
+                <div class="h5 mb-1">40 kg</div>
+                <small>Adolescent</small>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
@@ -61,8 +130,10 @@
   <div class="title-bar">
     <div class="d-flex align-items-center gap-2">
       <span class="app-title fw-semibold">Pediatric Drug Calculator</span>
+      <span class="badge bg-success fs-6">v2.0</span>
     </div>
     <div class="title-bar-controls">
+      <button id="quickActionsBtn" class="control-btn" title="Quick Actions"><i class="bi bi-lightning"></i></button>
       <button id="settingsBtn" class="control-btn" title="Settings"><i class="bi bi-gear"></i></button>
       <button id="minimizeBtn" class="control-btn" title="Minimize">−</button>
     </div>
@@ -75,7 +146,10 @@
 
     <!-- Header -->
     <header class="text-center mb-4">
-      <div class="bg-primary text-white rounded-3 p-4 shadow">
+      <div class="bg-primary text-white rounded-3 p-4 shadow position-relative">
+        <button id="emergencyModeBtn" class="btn btn-danger position-absolute top-0 end-0 m-3">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Emergency Mode
+        </button>
         <h1 class="display-5 fw-bold mb-2">
           <i class="bi bi-heart-pulse me-2"></i>Pediatric Emergency Drug Calculator
         </h1>
@@ -92,8 +166,9 @@
       <div class="card-body">
         <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
           
-          <!-- Weight Input -->
+          <!-- Weight Input with Quick Actions -->
           <div class="flex-grow-1" style="max-width: 500px;">
+            <label for="weight" class="form-label fw-semibold">Patient Weight</label>
             <div class="input-group input-group-lg">
               <input
                 type="number"
@@ -105,7 +180,14 @@
                 placeholder="Enter weight"
                 autofocus
               />
+              <button class="btn btn-outline-secondary" type="button" id="quickWeightsBtn" title="Quick weights">
+                <i class="bi bi-clock-history"></i>
+              </button>
               <span class="input-group-text bg-light fw-semibold">kg</span>
+            </div>
+            <div class="form-text d-flex justify-content-between">
+              <span>Last used: <span id="lastWeight">-</span></span>
+              <span>Range: 0.1 - 150 kg</span>
             </div>
           </div>
 
@@ -126,19 +208,19 @@
       </div>
     </div>
 
-    <!-- Summary Card -->
+    <!-- Summary Card - Now full width since we removed the speed card -->
     <div class="card summary-card shadow mb-4 d-none" id="summaryCard">
       <div class="card-body">
         <div class="row text-center">
-          <div class="col-md-3">
+          <div class="col-md-3 border-end">
             <div class="h4 mb-1" id="patientWeightDisplay">0 kg</div>
             <small class="opacity-75">Patient Weight</small>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3 border-end">
             <div class="h4 mb-1" id="totalMedsDisplay">0</div>
             <small class="opacity-75">Total Medications</small>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3 border-end">
             <div class="h4 mb-1" id="emergencyCount">0</div>
             <small class="opacity-75">Emergency Drugs</small>
           </div>
@@ -151,15 +233,20 @@
     </div>
 
     <!-- Results Table -->
-    <div class="card shadow">
+    <div class="card shadow mb-4">
       <!-- Header -->
       <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
         <h5 class="mb-0 text-primary fw-semibold">
           <i class="bi bi-list-ul me-2"></i>Medication Results
         </h5>
-        <span class="badge rounded-pill bg-secondary fs-6" id="resultsCount">
-          No calculations yet
-        </span>
+        <div class="d-flex align-items-center gap-3">
+          <span class="badge rounded-pill bg-secondary fs-6" id="resultsCount">
+            No calculations yet
+          </span>
+          <button class="btn btn-sm btn-outline-primary" id="expandAllBtn">
+            <i class="bi bi-arrows-expand me-1"></i>Expand All
+          </button>
+        </div>
       </div>
 
       <!-- Search & Filter Controls -->
@@ -176,11 +263,14 @@
                 placeholder="Search medication by name, route, or category"
                 aria-label="Search medications"
               />
+              <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn">
+                <i class="bi bi-x"></i>
+              </button>
             </div>
           </div>
 
           <!-- Filter Toggles -->
-          <div class="col-md-6 d-flex justify-content-md-end">
+          <div class="col-md-6 d-flex justify-content-md-end gap-2">
             <div class="btn-group" role="group" aria-label="Filter medications">
               <input type="radio" class="btn-check" name="filterGroup" id="filterAll" value="all" checked>
               <label class="btn btn-outline-primary" for="filterAll">
@@ -197,6 +287,17 @@
                 <i class="bi bi-activity me-1"></i>PRRT
               </label>
             </div>
+            
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-sort-alpha-down"></i>
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item sort-option" href="#" data-sort="name">Sort by Name</a></li>
+                <li><a class="dropdown-item sort-option" href="#" data-sort="category">Sort by Category</a></li>
+                <li><a class="dropdown-item sort-option" href="#" data-sort="dose">Sort by Dose</a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -205,7 +306,7 @@
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-hover medication-table align-middle mb-0">
-            <thead class="table-dark">
+            <thead class="table-dark sticky-top">
               <tr>
                 <th style="width: 120px;">Category</th>
                 <th>Medication</th>
@@ -214,20 +315,47 @@
                 <th class="text-center" style="width: 140px;">Concentration</th>
                 <th class="text-center" style="width: 80px;">Route</th>
                 <th style="width: 200px;">Clinical Notes</th>
+                <th style="width: 60px;"></th>
               </tr>
             </thead>
             <tbody id="all-results">
               <tr>
-                <td colspan="7" class="text-center py-5 text-muted">
+                <td colspan="8" class="text-center py-5 text-muted">
                   <i class="bi bi-calculator display-4 d-block mb-3 opacity-50"></i>
                   <div class="fs-5 fw-medium mb-2">Ready for Calculation</div>
                   <div class="text-muted">
-                    Enter patient weight and click <strong>“Calculate All”</strong> to see results
+                    Enter patient weight and click <strong>"Calculate All"</strong> to see results
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visualization Section -->
+    <div class="card shadow mb-4 d-none" id="visualizationCard">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-primary fw-semibold">
+          <i class="bi bi-bar-chart me-2"></i>Medication Overview
+        </h5>
+        <button class="btn btn-sm btn-outline-secondary" id="toggleChartsBtn" type="button">
+          <i class="bi bi-chevron-up"></i> Collapse
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="chart-container">
+              <canvas id="medicationChart" height="250"></canvas>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="chart-container">
+              <canvas id="routeChart" height="250"></canvas>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -243,10 +371,8 @@
 
         <!-- Version + GitHub Link -->
         <div class="d-flex align-items-center gap-3 mt-2 mt-md-0">
-          <span class="app-version text-primary fw-bold">
-            v1.0.0
-          </span>
-          <a href="https://github.com/yazen4Gamer" 
+          <span class="badge bg-primary">v2.0.0</span>
+          <a href="https://github.com/yazen4Gamer/pediatric-drug-calculator" 
             class="text-decoration-none d-flex align-items-center gap-1 text-dark"
             target="_blank" rel="noopener noreferrer">
             <i class="bi bi-github fs-5"></i>
@@ -255,6 +381,8 @@
         </div>
       </div>
     </footer>
+
+  </div>
 
   <!-- ================================
        Scripts
