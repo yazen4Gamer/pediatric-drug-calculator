@@ -3,6 +3,7 @@
 
 import MedicationDatabase from './scripts/calc/medications-database.js';
 import PDFExporter from './scripts/pdf-exporter.js';
+import { PDF_FIELD_MAP } from './field-mapping.js';
 
 class DrugCalculator {
     constructor() {
@@ -33,7 +34,8 @@ class DrugCalculator {
     bindEvents() {
         // Main action buttons
         document.getElementById('calculateBtn').addEventListener('click', () => this.calculateAll());
-        document.getElementById('exportBtn').addEventListener('click', () => this.exportResults());
+        //document.getElementById('exportBtn').addEventListener('click', () => this.exportResults());
+        document.getElementById('exportBtn').addEventListener('click', () => this.exportTemplatePDF());
         document.getElementById('clearBtn').addEventListener('click', () => this.clearAll());
         document.getElementById('expandAllBtn').addEventListener('click', () => this.toggleAllDetails());
         document.getElementById('emergencyModeBtn').addEventListener('click', () => this.toggleEmergencyMode());
@@ -321,54 +323,71 @@ class DrugCalculator {
     // CALCULATION - IMPROVED
     // ------------------------------
     calculateAll() {
-        const weightInput = document.getElementById('weight');
-        const weight = parseFloat(weightInput.value);
+    const weightInput = document.getElementById('weight');
+    const weight = parseFloat(weightInput.value);
 
-        if (!weight || weight <= 0 || isNaN(weight)) {
-            this.showError('Please enter a valid weight greater than 0 kg');
-            weightInput.focus();
-            return;
-        }
-
-        if (weight > 150) {
-            this.showError('Maximum weight is 150 kg');
-            weightInput.value = '150';
-            weightInput.focus();
-            return;
-        }
-
-        this.currentWeight = weight;
-        this.updateStatus(`Calculating doses for ${weight} kg patient...`);
-        this.showLoadingState();
-
-        // Use requestAnimationFrame for better performance
-        requestAnimationFrame(() => {
-            try {
-                const emergencyResults = this.calculateCategory('emergency', weight);
-                const prrtResults = this.calculateCategory('prrt', weight);
-                const allResults = [...emergencyResults, ...prrtResults];
-
-                this.currentResults = allResults;
-                this.displayModernTable(allResults);
-                this.updateSummaryCard(weight, allResults.length, emergencyResults.length, prrtResults.length);
-                this.updateVisualization(allResults);
-
-                // Save to history and settings
-                this.addToHistory(weight);
-                this.settings.lastWeight = weight;
-                this.saveSettings();
-                document.getElementById('lastWeight').textContent = `${weight} kg`;
-
-                document.getElementById('exportBtn').disabled = false;
-                this.updateStatus(`Calculation complete for ${weight} kg patient - ${allResults.length} medications calculated`);
-                this.showSuccess('All medications calculated successfully');
-            } catch (error) {
-                console.error('Calculation error:', error);
-                this.showError(`Calculation error: ${error.message}`);
-                this.showLoadingError();
-            }
-        });
+    if (!weight || weight <= 0 || isNaN(weight)) {
+        this.showError('Please enter a valid weight greater than 0 kg');
+        weightInput.focus();
+        return;
     }
+
+    if (weight > 150) {
+        this.showError('Maximum weight is 150 kg');
+        weightInput.value = '150';
+        weightInput.focus();
+        return;
+    }
+
+    this.currentWeight = weight;
+    this.updateStatus(`Calculating doses for ${weight} kg patient...`);
+    this.showLoadingState();
+
+    requestAnimationFrame(() => {
+        try {
+            const emergencyResults = this.calculateCategory('emergency', weight);
+            const prrtResults = this.calculateCategory('prrt', weight);
+            const allResults = [...emergencyResults, ...prrtResults];
+
+            // 🧾 Detailed console log for each medication
+            console.groupCollapsed(`💊 Medication Calculations for ${weight} kg`);
+            allResults.forEach((med, index) => {
+                console.log(
+                    `%c#${index + 1} ${med.name}`,
+                    'color: #4CAF50; font-weight: bold;'
+                );
+                console.log(`   • Route: ${med.route}`);
+                console.log(`   • Equation: ${med.rawMedication?.equation || med.equation}`);
+                console.log(`   • Calculated Volume: ${med.displayVolume} mL`);
+                if (med.totalDose) console.log(`   • Total Dose: ${med.totalDose}`);
+                if (med.categoryType) console.log(`   • Category: ${med.categoryType}`);
+                console.log('------------------------------');
+            });
+            console.groupEnd();
+
+            console.log(`✅ Calculated ${allResults.length} medications for ${weight} kg patient`);
+
+            this.currentResults = allResults;
+            this.displayModernTable(allResults);
+            this.updateSummaryCard(weight, allResults.length, emergencyResults.length, prrtResults.length);
+            this.updateVisualization(allResults);
+
+            this.addToHistory(weight);
+            this.settings.lastWeight = weight;
+            this.saveSettings();
+            document.getElementById('lastWeight').textContent = `${weight} kg`;
+
+            document.getElementById('exportBtn').disabled = false;
+            this.updateStatus(`Calculation complete for ${weight} kg patient - ${allResults.length} medications calculated`);
+            this.showSuccess('All medications calculated successfully');
+        } catch (error) {
+            console.error('Calculation error:', error);
+            this.showError(`Calculation error: ${error.message}`);
+            this.showLoadingError();
+        }
+    });
+}
+
 
     showLoadingState() {
         document.getElementById('all-results').innerHTML = `
@@ -877,8 +896,97 @@ class DrugCalculator {
     }
 
     // ------------------------------
-    // EXPORT TO PDF
+    // EXPORT TEMPLATE PDF (Enhanced + Unified UI)
     // ------------------------------
+    async exportTemplatePDF() {
+        console.log('🚀 Starting Template PDF Export...');
+
+        // 1️⃣ Validate input
+        if (!this.currentWeight || !this.currentResults?.length) {
+            this.showError('No calculation results to export. Please calculate medications first.');
+            return;
+        }
+
+        // 2️⃣ Prepare UI feedback
+        this.updateStatus('Generating professional template PDF...');
+        const exportBtn = document.getElementById('exportBtn');
+        const originalText = exportBtn.innerHTML;
+        exportBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Generating PDF...';
+        exportBtn.disabled = true;
+
+        // 3️⃣ Base payload info
+        const payload = {
+            Weight: `${this.currentWeight} Kg`,
+            Date: new Date().toLocaleString(),
+        };
+
+        // 4️⃣ Build dynamic medication field mapping
+        console.groupCollapsed(`💊 Building Template PDF Payload for ${this.currentWeight} kg...`);
+        this.currentResults.forEach(med => {
+            const nameKey = med.name.toLowerCase().trim();
+            const routeKey = `${med.name.toLowerCase()} ${med.route.toLowerCase()}`.trim();
+
+            const field =
+                PDF_FIELD_MAP[routeKey] ||
+                PDF_FIELD_MAP[nameKey] ||
+                PDF_FIELD_MAP[med.rawMedication?.name?.toLowerCase()] ||
+                null;
+
+            if (field) {
+                const isEnergy =
+                    med.category.toLowerCase().includes('shock') ||
+                    med.route.toLowerCase().includes('energy');
+
+                const unit = isEnergy ? 'J' : 'mL';
+                payload[field] = `${parseFloat(med.displayVolume).toFixed(2)} ${unit}`;
+
+                console.log(
+                    `%c✔ Added → ${field}: ${payload[field]} (from "${med.name}" [${med.route}])`,
+                    'color: #4CAF50; font-weight: bold;'
+                );
+            } else {
+                console.warn(`⚠️ No PDF field mapping found for "${med.name}" (${med.route})`);
+            }
+        });
+        console.groupEnd();
+
+        console.log(
+            '📄 Final PDF Payload:\n' +
+            Object.entries(payload)
+                .map(([k, v]) => `   ${k}: ${v}`)
+                .join('\n')
+        );
+
+        // 5️⃣ Generate and save the PDF
+        try {
+            const res = await window.electronAPI.fillTemplatePDF(payload);
+            console.log('🧾 Template PDF export result:', res);
+
+            // ✅ UI Feedback
+            if (res.ok) {
+                this.showSuccess(`✅ Template PDF created successfully!`);
+                this.updateStatus(`Template PDF saved to: ${res.output}`);
+
+                // Brief success animation on button
+                exportBtn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>PDF Ready!';
+                setTimeout(() => {
+                    exportBtn.innerHTML = originalText;
+                    exportBtn.disabled = false;
+                }, 1800);
+            } else {
+                this.showError(`Template PDF failed: ${res.error}`);
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('❌ PDF export error:', error);
+            this.showError(`PDF export failed: ${error.message}`);
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+        }
+    }
+
+
     async exportResults() {
         if (!this.currentWeight || !this.currentResults.length) {
             this.showError('No calculation results to export. Please calculate medications first.');

@@ -29,7 +29,8 @@
     "electron-updater": "^5.0.0",
     "html2canvas": "^1.4.1",
     "is-elevated": "^4.0.0",
-    "mathjs": "^15.0.0"
+    "mathjs": "^15.0.0",
+    "pdf-lib": "^1.17.1"
   },
   "build": {
     "appId": "com.medical.pediatriccalculator",
@@ -46,7 +47,7 @@
     "win": {
       "target": "nsis",
       "icon": "assets/icon.ico",
-      "requestedExecutionLevel": "asInvoker"  
+      "requestedExecutionLevel": "asInvoker"
     },
     "nsis": {
       "oneClick": false,
@@ -55,8 +56,8 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Pediatric Drug Calculator",
       "runAfterFinish": true,
-      "perMachine": false,                     
-      "allowElevation": true                   
+      "perMachine": false,
+      "allowElevation": true
     }
   }
 }

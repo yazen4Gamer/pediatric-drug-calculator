@@ -16,6 +16,10 @@ export default class MedicationDatabase {
             { name: "Atropine 0.5 mg/ml", concentration: "0.5", equation: "0.04 * W", min_ml: 0.2, max_ml: 1, route: "IV", category: "Cardiac", notes: "Min 0.2 mL, max 1 mL", type: "emergency" },
             { name: "Atropine 0.6 mg/ml", concentration: "0.6", equation: "0.033 * W", min_ml: 0.167, max_ml: 0.833, route: "IV", category: "Cardiac", notes: "Min 0.167 mL, max 0.833 mL", type: "emergency" },
 
+            { name: "Atropine 1 mg/10 ml ET", concentration: "0.1", equation: "0.6 * W", min_ml: 0, max_ml: 20, route: "ET", category: "Cardiac", notes: "Minimum dose 1 mL, maximum dose 5 mL", type: "emergency" },
+            { name: "Atropine 0.5 mg/ml ET", concentration: "0.5", equation: "0.12 * W", min_ml: 0, max_ml: 4, route: "ET", category: "Cardiac", notes: "Min 0.2 mL, max 1 mL", type: "emergency" },
+            { name: "Atropine 0.6 mg/ml ET", concentration: "0.6", equation: "0.1 * W", min_ml: 0, max_ml: 3.33, route: "ET", category: "Cardiac", notes: "Min 0.167 mL, max 0.833 mL", type: "emergency" },
+
             { name: "Amiodarone", concentration: "50", equation: "0.1 * W", min_ml: 0, max_ml: 300, route: "IV", category: "Cardiac", notes: "For refractory VF/VT", type: "emergency" },
             { name: "Adenosine 1st", concentration: "3", equation: "0.033 * W", min_ml: 0, max_ml: 6, route: "IV", category: "Cardiac", notes: "First dose for SVT, rapid push", type: "emergency" },
             { name: "Adenosine 2nd", concentration: "3", equation: "0.067 * W", min_ml: 0, max_ml: 12, route: "IV", category: "Cardiac", notes: "Second dose for SVT", type: "emergency" },
@@ -32,7 +36,14 @@ export default class MedicationDatabase {
 
             { name: "Rocuronium", concentration: "10", equation: "0.06 * W", min_ml: 0, max_ml: null, route: "IV", category: "Neuromuscular", notes: "RSI", type: "emergency" },
             { name: "Sodium Bicarbonate", concentration: "1", equation: "1.0 * W", min_ml: 0, max_ml: null, route: "IV", category: "Electrolyte", notes: "Metabolic acidosis", type: "emergency" },
-            { name: "Sodium Chloride", concentration: "0", equation: "20.0 * W", min_ml: 0, max_ml: null, route: "IV", category: "Fluid", notes: "Bolus", type: "emergency" }
+            { name: "Sodium Chloride", concentration: "0", equation: "20.0 * W", min_ml: 0, max_ml: null, route: "IV", category: "Fluid", notes: "Bolus", type: "emergency" },
+
+            { name: "Defibrillation 1", concentration: "—", equation: "2 * W", min_ml: 0, max_ml: null, route: "Energy", category: "Shock", notes: "1️⃣ 2 J/kg – CPR 5 cycles (2 min)\nTreatment of VF/Pulseless VT\nAssess rhythm after each shock.", type: "emergency" },
+            { name: "Defibrillation 2", concentration: "—", equation: "4 * W", min_ml: 0, max_ml: null, route: "Energy", category: "Shock", notes: "2️⃣ 4 J/kg – CPR 5 cycles (2 min)\nContinue for VF/Pulseless VT\nReassess rhythm before next shock.", type: "emergency" },
+            
+            { name: "Defibrillation 3", concentration: "—", equation: "4 * W", min_ml: 0, max_ml: null, route: "Energy", category: "Shock", notes: "3️⃣ 4 J/kg – CPR 5 cycles (2 min)\nIf still VF/VT, continue cycle and reassess.", type: "emergency" },
+
+            { name: "Cardioversion", concentration: "—", equation: "1 * W", min_ml: 0, max_ml: null, route: "Energy", category: "Shock", notes: "Synchronized cardioversion for unstable SVT/AF/AFlutter\nInitial dose 0.5-1 J/kg", type: "emergency" },
         ];
     }
 

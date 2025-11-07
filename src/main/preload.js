@@ -21,5 +21,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Optional event listeners (e.g. window state)
   onFullscreenChanged: (callback) => ipcRenderer.on('fullscreen-changed', (_, state) => callback(state)),
   onWindowFocused: (callback) => ipcRenderer.on('window-focused', callback),
-  onWindowBlurred: (callback) => ipcRenderer.on('window-blurred', callback)
+  onWindowBlurred: (callback) => ipcRenderer.on('window-blurred', callback),
+  
+
+  fillTemplatePDF: (data) => ipcRenderer.invoke('fill-template-pdf', data),
 });

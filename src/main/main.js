@@ -1,5 +1,6 @@
 // main.js
 const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
+const { fillTemplate } = require('./pdf-template-filler.js'); // adjust path if needed
 const path = require('path');
 const fs = require('fs');
 
@@ -249,6 +250,14 @@ app.whenReady().then(() => {
     // IPC handlers
     ipcMain.handle('minimize-window', () => appWindow.minimizeToTray());
     ipcMain.handle('toggle-fullscreen', () => appWindow.toggleFullscreen());
+    ipcMain.handle('fill-template-pdf', async (event, data) => {
+    try {
+        const output = await fillTemplate(data);
+        return { ok: true, output };
+    } catch (err) {
+        return { ok: false, error: err.message };
+    }
+    });
     ipcMain.handle('exit-app', () => {
         if (appWindow.showExitConfirmation()) {
             appWindow.exitApp();
